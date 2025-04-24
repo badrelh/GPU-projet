@@ -10,37 +10,37 @@
 
 #define LIFE_COLOR (ezv_rgb (255, 255, 0))
 
-//evaluation lazy 
-static unsigned *restrict lazy_table_cur = NULL;
-static unsigned *restrict lazy_table_next = NULL;
+//evaluation lazy_char 
+static unsigned *restrict lazy_char_table_cur = NULL;
+static unsigned *restrict lazy_char_table_next = NULL;
 
 
 #define TILE_Y (DIM / TILE_H)
 #define TILE_X (DIM / TILE_W)
 
-#define lazy_cur(y, x) lazy_table_cur[(y) * TILE_X + (x)]
-#define lazy_next(y, x) lazy_table_next[(y) * TILE_X + (x)]
+#define lazy_char_cur(y, x) lazy_char_table_cur[(y) * TILE_X + (x)]
+#define lazy_char_next(y, x) lazy_char_table_next[(y) * TILE_X + (x)]
 
-void lazy_init(void) {
-  lazy_table_cur = malloc(TILE_X * TILE_Y * sizeof(unsigned));
-  lazy_table_next = malloc(TILE_X * TILE_Y * sizeof(unsigned));
-  memset(lazy_table_cur, 1, TILE_X * TILE_Y * sizeof(unsigned)); //forcer le calcul de tuile au départ
-  memset(lazy_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
+void lazy_char_init(void) {
+  lazy_char_table_cur = malloc(TILE_X * TILE_Y * sizeof(unsigned));
+  lazy_char_table_next = malloc(TILE_X * TILE_Y * sizeof(unsigned));
+  memset(lazy_char_table_cur, 1, TILE_X * TILE_Y * sizeof(unsigned)); //forcer le calcul de tuile au départ
+  memset(lazy_char_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
 }
 
-void lazy_finalize(void) {
-  free(lazy_table_cur);
-  free(lazy_table_next);
+void lazy_char_finalize(void) {
+  free(lazy_char_table_cur);
+  free(lazy_char_table_next);
 }
 
-static int initialised_omp_lazy = 0;
+static int initialised_omp_lazy_char = 0;
 
 
-typedef unsigned cell_t;
+typedef unsigned char;
 
-static cell_t *_table = NULL, *_alternate_table = NULL;
+static char *_table = NULL, *_alternate_table = NULL;
 
-static inline cell_t *table_cell (cell_t *restrict i, int y, int x)
+static inline char *table_cell (char *restrict i, int y, int x)
 {
   return i + y * DIM + x;
 }
@@ -50,13 +50,13 @@ static inline cell_t *table_cell (cell_t *restrict i, int y, int x)
 #define cur_table(y, x) (*table_cell (_table, (y), (x)))
 #define next_table(y, x) (*table_cell (_alternate_table, (y), (x)))
 
-void life_init (void)
+void life_char_init (void)
 {
 
   // life_init may be (indirectly) called several times so we check if data were
   // already allocated
   if (_table == NULL) {
-    const unsigned size = DIM * DIM * sizeof (cell_t);
+    const unsigned size = DIM * DIM * sizeof (char);
 
     PRINT_DEBUG ('u', "Memory footprint = 2 x %d bytes\n", size);
 
@@ -68,18 +68,18 @@ void life_init (void)
   }
 }
 
-void life_finalize (void)
+void life_char_finalize (void)
 {
-  if(initialised_omp_lazy) //desallocation des deux lazy tables si elles sont intialisées
-    lazy_finalize();
-  const unsigned size = DIM * DIM * sizeof (cell_t);
+  if(initialised_omp_lazy_char) //desallocation des deux lazy_char tables si elles sont intialisées
+    lazy_char_finalize();
+  const unsigned size = DIM * DIM * sizeof (char);
 
   munmap (_table, size);
   munmap (_alternate_table, size);
 }
 
 // This function is called whenever the graphical window needs to be refreshed
-void life_refresh_img (void)
+void life_char_refresh_img (void)
 {
   for (int i = 0; i < DIM; i++)
     for (int j = 0; j < DIM; j++)
@@ -88,14 +88,14 @@ void life_refresh_img (void)
 
 static inline void swap_tables (void)
 {
-  cell_t *tmp = _table;
+  char *tmp = _table;
 
   _table           = _alternate_table;
   _alternate_table = tmp;
 }
 
 ///////////////////////////// Default tiling
-int life_do_tile_default (int x, int y, int width, int height)
+int life_char_do_tile_default (int x, int y, int width, int height)
 {
   int change = 0;
 
@@ -130,7 +130,7 @@ int life_do_tile_default (int x, int y, int width, int height)
 
 ///////////////////////////// Sequential version (seq)
 //
-unsigned life_compute_seq (unsigned nb_iter)
+unsigned life_char_compute_seq (unsigned nb_iter)
 {
   for (unsigned it = 1; it <= nb_iter; it++) {
 
@@ -148,7 +148,7 @@ unsigned life_compute_seq (unsigned nb_iter)
 
 ///////////////////////////// Tiled sequential version (tiled)
 //
-unsigned life_compute_tiled (unsigned nb_iter)
+unsigned life_char_compute_tiled (unsigned nb_iter)
 {
   unsigned res = 0;
 
@@ -172,7 +172,7 @@ unsigned life_compute_tiled (unsigned nb_iter)
 
 ///////////////////////////// OMP version (omp)
 //
-unsigned life_compute_omp (unsigned nb_iter)
+unsigned life_char_compute_omp (unsigned nb_iter)
 {
   unsigned res = 0;
 
@@ -197,34 +197,34 @@ unsigned life_compute_omp (unsigned nb_iter)
 }
 
 
-/////////////////////////// Lazy IMPLEMENTATION (omp lazy)
+/////////////////////////// lazy_char IMPLEMENTATION (omp lazy_char)
 
 
 
-void swap_tables_lazy(void) {
-  unsigned *tmp = lazy_table_cur;
-  lazy_table_cur = lazy_table_next;
-  lazy_table_next = tmp;
-  memset(lazy_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
+void swap_tables_lazy_char(void) {
+  unsigned *tmp = lazy_char_table_cur;
+  lazy_char_table_cur = lazy_char_table_next;
+  lazy_char_table_next = tmp;
+  memset(lazy_char_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
 }
 
-int tile_has_active_neighbor(int ty, int tx) {
+int tile_has_active_neighbor_char(int ty, int tx) {
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
       int ny = ty + dy;
       int nx = tx + dx;
       if (ny >= 0 && ny < TILE_Y && nx >= 0 && nx < TILE_X)
-        if (lazy_cur(ny, nx)) return 1;
+        if (lazy_char_cur(ny, nx)) return 1;
     }
   }
   return 0;
 }
 
-unsigned life_compute_omp_lazy(unsigned nb_iter)
+unsigned life_char_compute_omp_lazy(unsigned nb_iter)
 {
-  if(!initialised_omp_lazy){
-    lazy_init();
-    initialised_omp_lazy= 1;
+  if(!initialised_omp_lazy_char){
+    lazy_char_init();
+    initialised_omp_lazy_char= 1;
   }
   unsigned res = 0;
 
@@ -234,18 +234,18 @@ unsigned life_compute_omp_lazy(unsigned nb_iter)
     #pragma omp parallel for collapse(2) reduction(|:change)
     for (int ty = 0; ty < TILE_Y; ty++) {
       for (int tx = 0; tx < TILE_X; tx++) {
-        if (tile_has_active_neighbor(ty, tx)) {
+        if (tile_has_active_neighbor_char(ty, tx)) {
           int x = tx * TILE_W;
           int y = ty * TILE_H;
           int local_change = do_tile(x, y, TILE_W, TILE_H);
-          lazy_next(ty, tx) = local_change;
+          lazy_char_next(ty, tx) = local_change;
           change |= local_change;
         }
       }
     }
 
     swap_tables();
-    swap_tables_lazy();
+    swap_tables_lazy_char();
 
     if (!change) {
       res = it;
@@ -259,7 +259,7 @@ unsigned life_compute_omp_lazy(unsigned nb_iter)
 
 ///////////////////////////// Initial configs
 
-void life_draw_guns (void);
+void life_char_draw_guns (void);
 
 static inline void set_cell (int y, int x)
 {
@@ -273,54 +273,54 @@ static inline int get_cell (int y, int x)
   return cur_table (y, x);
 }
 
-static void inline life_rle_parse (char *filename, int x, int y,
+static void inline life_char_rle_parse (char *filename, int x, int y,
                                    int orientation)
 {
   rle_lexer_parse (filename, x, y, set_cell, orientation);
 }
 
-static void inline life_rle_generate (char *filename, int x, int y, int width,
+static void inline life_char_rle_generate (char *filename, int x, int y, int width,
                                       int height)
 {
   rle_generate (x, y, width, height, get_cell, filename);
 }
 
-void life_draw (char *param)
+void life_char_draw (char *param)
 {
   if (param && (access (param, R_OK) != -1)) {
     // The parameter is a filename, so we guess it's a RLE-encoded file
-    life_rle_parse (param, 1, 1, RLE_ORIENTATION_NORMAL);
+    life_char_rle_parse (param, 1, 1, RLE_ORIENTATION_NORMAL);
   } else
     // Call function ${kernel}_draw_${param}, or default function (second
     // parameter) if symbol not found
-    hooks_draw_helper (param, life_draw_guns);
+    hooks_draw_helper (param, life_char_draw_guns);
 }
 
 static void otca_autoswitch (char *name, int x, int y)
 {
-  life_rle_parse (name, x, y, RLE_ORIENTATION_NORMAL);
-  life_rle_parse ("data/rle/autoswitch-ctrl.rle", x + 123, y + 1396,
+  life_char_rle_parse (name, x, y, RLE_ORIENTATION_NORMAL);
+  life_char_rle_parse ("data/rle/autoswitch-ctrl.rle", x + 123, y + 1396,
                   RLE_ORIENTATION_NORMAL);
 }
 
-static void otca_life (char *name, int x, int y)
+static void otca_life_char (char *name, int x, int y)
 {
-  life_rle_parse (name, x, y, RLE_ORIENTATION_NORMAL);
-  life_rle_parse ("data/rle/b3-s23-ctrl.rle", x + 123, y + 1396,
+  life_char_rle_parse (name, x, y, RLE_ORIENTATION_NORMAL);
+  life_char_rle_parse ("data/rle/b3-s23-ctrl.rle", x + 123, y + 1396,
                   RLE_ORIENTATION_NORMAL);
 }
 
 static void at_the_four_corners (char *filename, int distance)
 {
-  life_rle_parse (filename, distance, distance, RLE_ORIENTATION_NORMAL);
-  life_rle_parse (filename, distance, distance, RLE_ORIENTATION_HINVERT);
-  life_rle_parse (filename, distance, distance, RLE_ORIENTATION_VINVERT);
-  life_rle_parse (filename, distance, distance,
+  life_char_rle_parse (filename, distance, distance, RLE_ORIENTATION_NORMAL);
+  life_char_rle_parse (filename, distance, distance, RLE_ORIENTATION_HINVERT);
+  life_char_rle_parse (filename, distance, distance, RLE_ORIENTATION_VINVERT);
+  life_char_rle_parse (filename, distance, distance,
                   RLE_ORIENTATION_HINVERT | RLE_ORIENTATION_VINVERT);
 }
 
-// Suggested cmdline: ./run -k life -s 2176 -a otca_off -ts 64 -r 10 -si
-void life_draw_otca_off (void)
+// Suggested cmdline: ./run -k life_char -s 2176 -a otca_off -ts 64 -r 10 -si
+void life_char_draw_otca_off (void)
 {
   if (DIM < 2176)
     exit_with_error ("DIM should be at least %d", 2176);
@@ -328,8 +328,8 @@ void life_draw_otca_off (void)
   otca_autoswitch ("data/rle/otca-off.rle", 1, 1);
 }
 
-// Suggested cmdline: ./run -k life -s 2176 -a otca_on -ts 64 -r 10 -si
-void life_draw_otca_on (void)
+// Suggested cmdline: ./run -k life_char -s 2176 -a otca_on -ts 64 -r 10 -si
+void life_char_draw_otca_on (void)
 {
   if (DIM < 2176)
     exit_with_error ("DIM should be at least %d", 2176);
@@ -337,46 +337,46 @@ void life_draw_otca_on (void)
   otca_autoswitch ("data/rle/otca-on.rle", 1, 1);
 }
 
-// Suggested cmdline: ./run -k life -s 6208 -a meta3x3 -ts 64 -r 50 -si
-void life_draw_meta3x3 (void)
+// Suggested cmdline: ./run -k life_char -s 6208 -a meta3x3 -ts 64 -r 50 -si
+void life_char_draw_meta3x3 (void)
 {
   if (DIM < 6208)
     exit_with_error ("DIM should be at least %d", 6208);
 
   for (int i = 0; i < 3; i++)
     for (int j = 0; j < 3; j++)
-      otca_life (j == 1 ? "data/rle/otca-on.rle" : "data/rle/otca-off.rle",
+      otca_life_char (j == 1 ? "data/rle/otca-on.rle" : "data/rle/otca-off.rle",
                  1 + j * (2058 - 10), 1 + i * (2058 - 10));
 }
 
-// Suggested cmdline: ./run -k life -a bugs -ts 64
-void life_draw_bugs (void)
+// Suggested cmdline: ./run -k life_char -a bugs -ts 64
+void life_char_draw_bugs (void)
 {
   for (int y = 16; y < DIM / 2; y += 32) {
-    life_rle_parse ("data/rle/tagalong.rle", y + 1, y + 8,
+    life_char_rle_parse ("data/rle/tagalong.rle", y + 1, y + 8,
                     RLE_ORIENTATION_NORMAL);
-    life_rle_parse ("data/rle/tagalong.rle", y + 1, (DIM - 32 - y) + 8,
+    life_char_rle_parse ("data/rle/tagalong.rle", y + 1, (DIM - 32 - y) + 8,
                     RLE_ORIENTATION_NORMAL);
   }
 }
 
-// Suggested cmdline: ./run -k life -v omp -a ship -s 512 -m -ts 16
-void life_draw_ship (void)
+// Suggested cmdline: ./run -k life_char -v omp -a ship -s 512 -m -ts 16
+void life_char_draw_ship (void)
 {
   for (int y = 16; y < DIM / 2; y += 32) {
-    life_rle_parse ("data/rle/tagalong.rle", y + 1, y + 8,
+    life_char_rle_parse ("data/rle/tagalong.rle", y + 1, y + 8,
                     RLE_ORIENTATION_NORMAL);
-    life_rle_parse ("data/rle/tagalong.rle", y + 1, (DIM - 32 - y) + 8,
+    life_char_rle_parse ("data/rle/tagalong.rle", y + 1, (DIM - 32 - y) + 8,
                     RLE_ORIENTATION_NORMAL);
   }
 
   for (int y = 43; y < DIM - 134; y += 148) {
-    life_rle_parse ("data/rle/greyship.rle", DIM - 100, y,
+    life_char_rle_parse ("data/rle/greyship.rle", DIM - 100, y,
                     RLE_ORIENTATION_NORMAL);
   }
 }
 
-void life_draw_stable (void)
+void life_char_draw_stable (void)
 {
   for (int i = 1; i < DIM - 2; i += 4)
     for (int j = 1; j < DIM - 2; j += 4) {
@@ -387,7 +387,7 @@ void life_draw_stable (void)
     }
 }
 
-void life_draw_oscil (void)
+void life_char_draw_oscil (void)
 {
   for (int i = 2; i < DIM - 4; i += 4)
     for (int j = 2; j < DIM - 4; j += 4) {
@@ -403,7 +403,7 @@ void life_draw_oscil (void)
     }
 }
 
-void life_draw_guns (void)
+void life_char_draw_guns (void)
 {
   at_the_four_corners ("data/rle/gun.rle", 1);
 }
@@ -426,7 +426,7 @@ static unsigned long pseudo_random ()
   return seed;
 }
 
-void life_draw_random (void)
+void life_char_draw_random (void)
 {
   for (int i = 1; i < DIM - 1; i++)
     for (int j = 1; j < DIM - 1; j++)
@@ -434,16 +434,16 @@ void life_draw_random (void)
         set_cell (i, j);
 }
 
-// Suggested cmdline: ./run -k life -a clown -s 256 -i 110
-void life_draw_clown (void)
+// Suggested cmdline: ./run -k life_char -a clown -s 256 -i 110
+void life_char_draw_clown (void)
 {
-  life_rle_parse ("data/rle/clown-seed.rle", DIM / 2, DIM / 2,
+  life_char_rle_parse ("data/rle/clown-seed.rle", DIM / 2, DIM / 2,
                   RLE_ORIENTATION_NORMAL);
 }
 
-void life_draw_diehard (void)
+void life_char_draw_diehard (void)
 {
-  life_rle_parse ("data/rle/diehard.rle", DIM / 2, DIM / 2,
+  life_char_rle_parse ("data/rle/diehard.rle", DIM / 2, DIM / 2,
                   RLE_ORIENTATION_NORMAL);
 }
 
@@ -460,7 +460,7 @@ static void moult_rle (int size, int p, char *filepath)
 
   int positions = (DIM) / (size + 1);
 
-  life_rle_parse (filepath, size / 2, size / 2, RLE_ORIENTATION_NORMAL);
+  life_char_rle_parse (filepath, size / 2, size / 2, RLE_ORIENTATION_NORMAL);
   for (int k = 0; k < p; k++) {
     int px = pseudo_random () % positions;
     int py = pseudo_random () % positions;
@@ -468,20 +468,20 @@ static void moult_rle (int size, int p, char *filepath)
   }
 }
 
-// ./run  -k life -a moultdiehard130  -v omp -ts 32 -m -s 512
-void life_draw_moultdiehard130 (void)
+// ./run  -k life_char -a moultdiehard130  -v omp -ts 32 -m -s 512
+void life_char_draw_moultdiehard130 (void)
 {
   moult_rle (16, 128, "data/rle/diehard.rle");
 }
 
-// ./run  -k life -a moultdiehard2474  -v omp -ts 32 -m -s 1024
-void life_draw_moultdiehard1398 (void)
+// ./run  -k life_char -a moultdiehard2474  -v omp -ts 32 -m -s 1024
+void life_char_draw_moultdiehard1398 (void)
 {
   moult_rle (52, 96, "data/rle/diehard1398.rle");
 }
 
-// ./run  -k life -a moultdiehard2474  -v omp -ts 32 -m -s 2048
-void life_draw_moultdiehard2474 (void)
+// ./run  -k life_char -a moultdiehard2474  -v omp -ts 32 -m -s 2048
+void life_char_draw_moultdiehard2474 (void)
 {
   moult_rle (104, 32, "data/rle/diehard2474.rle");
 }
@@ -489,7 +489,7 @@ void life_draw_moultdiehard2474 (void)
 //////////// debug ////////////
 static int debug_hud = -1;
 
-void life_config (char *param)
+void life_char_config (char *param)
 {
   seed += param ? atoi (param) : 0; // config pseudo_random 
   if (picking_enabled) {
@@ -498,7 +498,7 @@ void life_config (char *param)
   }
 }
 
-void life_debug (int x, int y)
+void life_char_debug (int x, int y)
 {
   if (x == -1 || y == -1)
     ezv_hud_set (ctx[0], debug_hud, NULL);
