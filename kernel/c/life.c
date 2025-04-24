@@ -125,8 +125,32 @@ unsigned life_compute_tiled (unsigned nb_iter)
 
   for (unsigned it = 1; it <= nb_iter; it++) {
     unsigned change = 0;
+    for (int y = 0; y < DIM; y += TILE_H)
+      for (int x = 0; x < DIM; x += TILE_W)
+        change |= do_tile (x, y, TILE_W, TILE_H);
 
-    #pragma omp parallel for collapse(2) reduction(|:change) // parallélisation des deux boucles y et x et
+    swap_tables ();
+
+    if (!change) { // we stop if all cells are stable
+      res = it;
+      break;
+    }
+  }
+
+  return res;
+}
+
+
+///////////////////////////// OMP version (omp)
+//
+unsigned life_compute_omp (unsigned nb_iter)
+{
+  unsigned res = 0;
+
+  for (unsigned it = 1; it <= nb_iter; it++) {
+    unsigned change = 0;
+
+    #pragma omp parallel for collapse(2) reduction(|:change) // parallélisation des deux boucles y et x et éviter conditions de concurrences au niveau de la variable change
     for (int y = 0; y < DIM; y += TILE_H)
       for (int x = 0; x < DIM; x += TILE_W)
         change |= do_tile (x, y, TILE_W, TILE_H);
