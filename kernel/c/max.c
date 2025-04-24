@@ -58,6 +58,106 @@ static int tile_down_right_cpu (int x, int y, int w, int h, int cpu)
   return change;
 }
 
+static int tile_down_right_cpu_omp (int x, int y, int w, int h, int cpu)
+{
+  int change = 0;
+
+  monitoring_start (cpu);
+
+#pragma omp parallel for reduction(| : change) collapse(2)
+  for (int i = y; i < y + h; i++) {
+    for (int j = x; j < x + w; j++) {
+      if (cur_img (i, j)) {
+        uint32_t m = 0;
+        if (i > 0 && j > 0) {
+          m = MAX (cur_img (i - 1, j), cur_img (i, j - 1));
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (j > 0) {
+          m = cur_img (i, j - 1);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (i > 0) {
+          m = cur_img (i - 1, j);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        }
+      }
+    }
+  }
+
+  monitoring_end_tile_id (x, y, w, h, cpu, TASKID_DOWN_RIGHT);
+
+  return change;
+}
+
+
+#include <omp.h>
+#include <stdint.h>
+
+static int tile_down_right_cpu_task(int x, int y, int w, int h, int cpu) {
+    int change = 0;
+
+    monitoring_start(cpu);
+    #pragma omp parallel
+    {
+        #pragma omp single
+        {
+            if (cur_img(y, x)) {
+                uint32_t m = 0;
+                if (y > 0 && x > 0) {
+                    m = MAX(cur_img(y - 1, x), cur_img(y, x - 1));
+                    if (m > cur_img(y, x)) {
+                        change = 1;
+                        cur_img(y, x) = m;
+                    }
+                }
+            }
+        }
+        #pragma omp for collapse(2) nowait
+        for (int i = y; i < y + h; i++) {
+            for (int j = x; j < x + w; j++) {
+                #pragma omp task firstprivate(i, j) depend(in: cur_img(i - 1, j), cur_img(i, j - 1)) depend(out: cur_img(i, j))
+                {
+                    if (cur_img(i, j)) {
+                        uint32_t m = 0;
+                        if (i > 0 && j > 0) {
+                            m = MAX(cur_img(i - 1, j), cur_img(i, j - 1));
+                            if (m > cur_img(i, j)) {
+                                change = 1;
+                                cur_img(i, j) = m;
+                            }
+                        } else if (j > 0) {
+                            m = cur_img(i, j - 1);
+                            if (m > cur_img(i, j)) {
+                                change = 1;
+                                cur_img(i, j) = m;
+                            }
+                        } else if (i > 0) {
+                            m = cur_img(i - 1, j);
+                            if (m > cur_img(i, j)) {
+                                change = 1;
+                                cur_img(i, j) = m;
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    }
+
+    monitoring_end_tile_id(x, y, w, h, cpu, TASKID_DOWN_RIGHT);
+
+    return change;
+}
+
+
 // We propagate the max color up-left. This is the expensive implementation
 // which constantly checks border conditions...
 static int tile_up_left_cpu (int x, int y, int w, int h, int cpu)
@@ -95,10 +195,103 @@ static int tile_up_left_cpu (int x, int y, int w, int h, int cpu)
   return change;
 }
 
+static int tile_up_left_cpu_omp (int x, int y, int w, int h, int cpu)
+{
+  int change = 0;
+
+  monitoring_start (cpu);
+
+#pragma omp parallel for reduction(| : change) collapse(2)
+  for (int i = y + h - 1; i >= y; i--) {
+    for (int j = x + w - 1; j >= x; j--) {
+      if (cur_img (i, j)) {
+        uint32_t m = 0;
+        if (i < DIM - 1 && j < DIM - 1) {
+          m = MAX (cur_img (i + 1, j), cur_img (i, j + 1));
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (j < DIM - 1) {
+          m = cur_img (i, j + 1);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (i < DIM - 1) {
+          m = cur_img (i + 1, j);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        }
+      }
+    }
+  }
+
+  monitoring_end_tile_id (x, y, w, h, cpu, TASKID_UP_LEFT);
+
+  return change;
+}
+
+
+
+static int tile_up_left_cpu_task (int x, int y, int w, int h, int cpu)
+{
+  int change = 0;
+
+  monitoring_start (cpu);
+
+  #pragma omp for collapse(2) nowait
+  for (int i = y + h - 1; i >= y; i--) {
+    for (int j = x + w - 1; j >= x; j--) {
+      #pragma omp task firstprivate(i, j) depend(in: cur_img(i - 1, j), cur_img(i, j - 1)) depend(out: cur_img(i, j))
+    {
+      if (cur_img (i, j)) {
+        uint32_t m = 0;
+        if (i < DIM - 1 && j < DIM - 1) {
+          m = MAX (cur_img (i + 1, j), cur_img (i, j + 1));
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (j < DIM - 1) {
+          m = cur_img (i, j + 1);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        } else if (i < DIM - 1) {
+          m = cur_img (i + 1, j);
+          if (m > cur_img (i, j)) {
+            change         = 1;
+            cur_img (i, j) = m;
+          }
+        }
+      }
+    }
+  }
+  }
+
+  monitoring_end_tile_id (x, y, w, h, cpu, TASKID_UP_LEFT);
+
+  return change;
+}
+
 #define tile_down_right(x, y, w, h)                                            \
   tile_down_right_cpu (x, y, w, h, omp_get_thread_num ())
 #define tile_up_left(x, y, w, h)                                               \
   tile_up_left_cpu (x, y, w, h, omp_get_thread_num ())
+
+#define tile_down_right_omp(x, y, w, h)                                            \
+  tile_down_right_cpu_omp (x, y, w, h, omp_get_thread_num ())
+#define tile_up_left_omp(x, y, w, h)                                               \
+  tile_up_left_cpu_omp (x, y, w, h, omp_get_thread_num ())
+
+#define tile_down_right_task(x, y, w, h)                                            \
+  tile_down_right_cpu_omp (x, y, w, h, omp_get_thread_num ())
+#define tile_up_left_task(x, y, w, h)                                               \
+  tile_up_left_cpu_omp (x, y, w, h, omp_get_thread_num ())
 
 ///////////////////////////// Simple sequential version (seq)
 // Suggested cmdline(s):
@@ -108,13 +301,13 @@ unsigned max_compute_seq (unsigned nb_iter)
 {
   for (unsigned it = 1; it <= nb_iter; it++) {
 
-    if ((tile_down_right (0, 0, DIM, DIM) |
-         tile_up_left (0, 0, DIM, DIM)) == 0)
+    if ((tile_down_right (0, 0, DIM, DIM) | tile_up_left (0, 0, DIM, DIM)) == 0)
       return it;
   }
 
   return 0;
 }
+
 
 ///////////////////////////// Tiled sequential version (tiled)
 // Suggested cmdline(s):
@@ -144,6 +337,28 @@ unsigned max_compute_tiled (unsigned nb_iter)
   }
 
   return res;
+}
+
+unsigned max_compute_omp (unsigned nb_iter)
+{
+  for (unsigned it = 1; it <= nb_iter; it++) {
+
+    if ((tile_down_right_omp (0, 0, DIM, DIM) | tile_up_left_omp (0, 0, DIM, DIM)) == 0)
+      return it;
+  }
+
+  return 0;
+}
+
+unsigned max_compute_task (unsigned nb_iter)
+{
+  for (unsigned it = 1; it <= nb_iter; it++) {
+
+    if ((tile_down_right_task (0, 0, DIM, DIM) | tile_up_left_task (0, 0, DIM, DIM)) == 0)
+      return it;
+  }
+
+  return 0;
 }
 
 ///////////////////////////// Drawing functions

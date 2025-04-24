@@ -13,6 +13,7 @@ ENABLE_TRACE		= 1
 ENABLE_MPI			= 1
 ENABLE_SHA			= 1
 ENABLE_OPENCL		= 1
+#ENABLE_SDL		= 1
 #ENABLE_MIPP			= 1
 #ENABLE_CUDA			= 1
 #ENABLE_PAPI			= 1
@@ -30,7 +31,8 @@ CFLAGS 			:= -O3 -march=native
 CUDA_CFLAGS		:= -O3
 
 # Warnings
-CFLAGS			+= -Wall -Wno-unused-function
+# CFLAGS			+= -O0 -Wall -Wno-unused-function -march=native
+CFLAGS			+=  -Wall -Wno-unused-function 
 
 ####################################
 

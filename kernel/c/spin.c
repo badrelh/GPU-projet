@@ -159,11 +159,24 @@ static inline __m256 _mm256_abs_ps (__m256 a)
 static __m256 _mm256_atan_ps (__m256 x)
 {
   __m256 res;
+  __m256 term2;
+
+  __m256 pi_4 = _mm256_set1_ps((float)(M_PI_4)); 
+  __m256 result_mul1 = _mm256_mul_ps(x, pi_4);  
+
+  __m256 abs_x = _mm256_abs_ps(x); 
+  __m256 one = _mm256_set1_ps(1);  
+  __m256 one_minusx = _mm256_sub_ps(one, abs_x); 
+  term2 = _mm256_mul_ps(one_minusx, _mm256_set1_ps(0.273));  
+  res = _mm256_add_ps(result_mul1, term2);  
   
   // FIXME: we go back to sequential mode here :(
-  for (int i = 0; i < AVX_VEC_SIZE_FLOAT; i++)
-    res[i] = x[i] * M_PI_4 + 0.273 * x[i] * (1 - fabsf(x[i]));
-
+  // for (int i = 0; i < AVX_VEC_SIZE_FLOAT; i++){
+  //   __m256 d = _mm256_set1_pd(0.273)
+  //   __m256i one = _mm256_set1_epi32 (1);
+  //   _m256d t1 = 
+  //   res[i] += x[i] * M_PI_4 + 0.273 * x[i] * (1 - fabsf(x[i]));
+  // }
   return res;
   
   //  return x * M_PI_4 + 0.273 * x * (1 - abs(x));
@@ -189,14 +202,27 @@ static __m256 _mm256_atan2_ps (__m256 y, __m256 x)
   __m256 th = _mm256_atan_ps (z);
 
   // FIXME: we go back to sequential mode here :(
-  for (int i = 0; i < AVX_VEC_SIZE_FLOAT; i++) {
-    if (mask[i])
-      th[i] = M_PI_2 - th[i];
-    if (x[i] < 0)
-      th[i] = M_PI - th[i];
-    if (y[i] < 0)
-      th[i] = -th[i];
-  }
+  __m256 pi_2 = _mm256_set1_ps((float)(M_PI_2));
+  __m256 pi = _mm256_set1_ps((float)(M_PI));
+  __m256 z_if1 = _mm256_sub_ps(pi_2 ,th);
+  __m256 z_else = _mm256_sub_ps(pi ,th);
+  __m256 zero = _mm256_set1_ps(0);
+  __m256 z_else2 =_mm256_sub_ps(zero ,th);
+  __m256 mask_x =   _mm256_cmp_ps (zero,x, _CMP_GT_OS);
+  __m256 mask_y =   _mm256_cmp_ps (zero, y, _CMP_GT_OS);
+
+
+  __m256 result = _mm256_blendv_ps(z_if1, z_else, mask);
+  result = _mm256_blendv_ps(result, z_else, mask_x);
+  result = _mm256_blendv_ps(result, z_else2, mask_y);
+  // for (int i = 0; i < AVX_VEC_SIZE_FLOAT; i++) {
+  //   if (mask[i])
+  //     th[i] = M_PI_2 - th[i];
+  //   if (x[i] < 0)
+  //     th[i] = M_PI - th[i];
+  //   if (y[i] < 0)
+  //     th[i] = -th[i];
+  // }
 
   return th;
 }

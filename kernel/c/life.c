@@ -126,6 +126,7 @@ unsigned life_compute_tiled (unsigned nb_iter)
   for (unsigned it = 1; it <= nb_iter; it++) {
     unsigned change = 0;
 
+    #pragma omp parallel for collapse(2) reduction(|:change)
     for (int y = 0; y < DIM; y += TILE_H)
       for (int x = 0; x < DIM; x += TILE_W)
         change |= do_tile (x, y, TILE_W, TILE_H);
