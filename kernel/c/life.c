@@ -179,7 +179,7 @@ unsigned life_compute_omp (unsigned nb_iter)
   for (unsigned it = 1; it <= nb_iter; it++) {
     unsigned change = 0;
 
-    #pragma omp parallel for collapse(2) reduction(|:change) // parallélisation des deux boucles y et x et éviter conditions de concurrences au niveau de la variable change 
+    #pragma omp parallel for collapse(2) reduction(|:change) schedule(runtime) // parallélisation des deux boucles y et x et éviter conditions de concurrences au niveau de la variable change 
     for (int y = 0; y < DIM; y += TILE_H)
       for (int x = 0; x < DIM; x += TILE_W)
         //#pragma omp critical // 
