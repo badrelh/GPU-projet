@@ -35,9 +35,6 @@ void lazy_char_finalize(void) {
 
 static int initialised_omp_lazy_char = 0;
 
-
-typedef unsigned char;
-
 static char *_table = NULL, *_alternate_table = NULL;
 
 static inline char *table_cell (char *restrict i, int y, int x)
