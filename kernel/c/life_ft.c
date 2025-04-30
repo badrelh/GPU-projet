@@ -22,14 +22,14 @@ static unsigned *restrict lazy_table_next = NULL;
 #define lazy_cur(y, x) lazy_table_cur[(y) * TILE_X + (x)]
 #define lazy_next(y, x) lazy_table_next[(y) * TILE_X + (x)]
 
-void lazy_init(void) {
+void lazy_init_ft(void) {
   lazy_table_cur = malloc(TILE_X * TILE_Y * sizeof(unsigned));
   lazy_table_next = malloc(TILE_X * TILE_Y * sizeof(unsigned));
   memset(lazy_table_cur, 1, TILE_X * TILE_Y * sizeof(unsigned)); //forcer le calcul de tuile au départ
   memset(lazy_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
 }
 
-void lazy_finalize(void) {
+void lazy_finalize_ft(void) {
   free(lazy_table_cur);
   free(lazy_table_next);
 }
@@ -79,7 +79,7 @@ void life_ft_init (void)
 void life_ft_finalize (void)
 {
   if(initialised_omp_lazy) //desallocation des deux lazy tables si elles sont intialisées 
-    lazy_finalize();
+    lazy_finalize_ft();
   const unsigned size = DIM * DIM * sizeof (cell_t);
 
   munmap (_table, size);
@@ -209,14 +209,14 @@ unsigned life_ft_compute_omp (unsigned nb_iter)
 
 
 
-void swap_tables_lazy(void) {
+void swap_tables_lazy_ft(void) {
   unsigned *tmp = lazy_table_cur;
   lazy_table_cur = lazy_table_next;
   lazy_table_next = tmp;
   memset(lazy_table_next, 0, TILE_X * TILE_Y * sizeof(unsigned));
 }
 
-int tile_has_active_neighbor(int ty, int tx) {
+int tile_has_active_neighbor_ft(int ty, int tx) {
   for (int dy = -1; dy <= 1; dy++) {
     for (int dx = -1; dx <= 1; dx++) {
       int ny = ty + dy;
@@ -231,7 +231,7 @@ int tile_has_active_neighbor(int ty, int tx) {
 unsigned life_ft_compute_omp_lazy(unsigned nb_iter)
 {
   if(!initialised_omp_lazy){
-    lazy_init();
+    lazy_init_ft();
     initialised_omp_lazy= 1;
   }
   unsigned res = 0;
@@ -242,7 +242,7 @@ unsigned life_ft_compute_omp_lazy(unsigned nb_iter)
     #pragma omp parallel for collapse(2) reduction(|:change)
     for (int ty = 0; ty < TILE_Y; ty++) {
       for (int tx = 0; tx < TILE_X; tx++) {
-        if (tile_has_active_neighbor(ty, tx)) {
+        if (tile_has_active_neighbor_ft(ty, tx)) {
           int x = tx * TILE_W;
           int y = ty * TILE_H;
           int local_change = do_tile(x, y, TILE_W, TILE_H);
@@ -253,7 +253,7 @@ unsigned life_ft_compute_omp_lazy(unsigned nb_iter)
     }
 
     swap_tables();
-    swap_tables_lazy();
+    swap_tables_lazy_ft();
 
     if (!change) {
       res = it;
