@@ -46,7 +46,12 @@ int main() {
     }
 
     // CPU reference
+    clock_t start_cpu, end_cpu;
+    double cpu_time_used;
+    start_cpu = clock();
     vec_add_cpu(h_A, h_B, h_C_ref, N);
+    end_cpu = clock();  // Fin du chronométrage
+    cpu_time_used = ((double) (end_cpu - start_cpu)) / CLOCKS_PER_SEC;
 
     //Allocation GPU 
     float *d_A, *d_B, *d_C;
@@ -100,9 +105,11 @@ int main() {
     }
 
     // Output the times
-    printf("CPU Time: %f seconds\n", time_h2d / 1000);
+    printf("CPU Time (): %d seconds\n", cpu_time_used);
     printf("GPU Kernel Time: %f seconds\n", time_kernel / 1000);
     printf("Data Transfer Time (D->H): %f seconds\n", time_d2h / 1000);
+    printf("Data Transfer Time (H->D): %f seconds\n", time_h2d / 1000);
+
   
       // Nettoyage
       cudaFree(d_A); cudaFree(d_B); cudaFree(d_C);

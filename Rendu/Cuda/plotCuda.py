@@ -13,15 +13,15 @@ gpu_time = data["GPU_Time"]  # Temps GPU
 # Tracer les graphes
 plt.figure(figsize=(10, 6))
 
-plt.plot(N_values, cpu_time, label='CPU Time', marker='o')
-plt.plot(N_values, gpu_time, label='GPU Kernel Time', marker='x')
+plt.plot(N_values, cpu_time, label='Temps CPU', marker='o')
+plt.plot(N_values, gpu_time, label='Temps GPU', marker='x')
 
 # Ajouter des labels et un titre
 plt.xscale('log')
 plt.yscale('log')
-plt.xlabel('Size of N (log scale)')
-plt.ylabel('Time (seconds, log scale)')
-plt.title('Time vs N for CPU and GPU Operations')
+plt.xlabel('taille de N (log scale)')
+plt.ylabel('Temps (seconds, log scale)')
+plt.title('Temps d exécution en fct de N (GPU vs CPU)')
 plt.legend()
 
 # Afficher le graphique

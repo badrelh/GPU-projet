@@ -39,8 +39,8 @@ int main() {
     fprintf(file, "N,CPU_Time,GPU_Time\n");
 
     // Loop over different values of N
-    for (int i = 0; i < 10; i++) {
-        int N = 1 << (i + 15);  // Varying N from 2^10 to 2^25
+    for (int i = 0; i < 15; i++) {
+        int N = 1 << (i + 10);  // Varying N from 2^10 to 2^25
         size_t size = N * sizeof(float);
 
         // Allocate memory on the host
@@ -56,7 +56,12 @@ int main() {
         }
 
         // CPU reference
+        clock_t start_cpu, end_cpu;
+        double cpu_time_used;
+        start_cpu = clock();
         vec_add_cpu(h_A, h_B, h_C_ref, N);
+        end_cpu = clock();  // Fin du chronométrage
+        cpu_time_used = ((double) (end_cpu - start_cpu)) / CLOCKS_PER_SEC;
 
         // Allocate GPU memory
         float *d_A, *d_B, *d_C;
@@ -104,7 +109,7 @@ int main() {
         }
 
         // Output the times to the file
-        fprintf(file, "%d,%f,%f\n", N,  time_h2d / 1000, time_kernel / 1000);
+        fprintf(file, "%d,%f,%f\n", N,  cpu_time_used, time_kernel / 1000);
 
         // Free memory
         cudaFree(d_A);
