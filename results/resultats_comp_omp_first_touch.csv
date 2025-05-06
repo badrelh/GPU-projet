@@ -1,0 +1,15 @@
+kernel,version,taille,jeu_donnees,tile,threads,schedule,iterations,temps_ms
+life, seq,2048,random,32,1,static,1600,57019.131
+life_ft, seq,2048,random,32,1,static,1600,57280.033
+life, seq,2048,random,32,2,static,1600,57008.163
+life_ft, seq,2048,random,32,2,static,1600,57282.216
+life, seq,2048,random,32,4,static,1600,57006.947
+life_ft, seq,2048,random,32,4,static,1600,57282.014
+life, seq,2048,random,32,8,static,1600,57077.018
+life_ft, seq,2048,random,32,8,static,1600,57342.823
+life, seq,2048,random,32,12,static,1600,57053.015
+life_ft, seq,2048,random,32,12,static,1600,57363.469
+life, seq,2048,random,32,24,static,1600,57106.799
+life_ft, seq,2048,random,32,24,static,1600,57361.845
+life, seq,2048,random,32,48,static,1600,57094.188
+life_ft, seq,2048,random,32,48,static,1600,57355.341

@@ -1,0 +1,12 @@
+kernel,version,taille,jeu_donnees,tile,threads,schedule,iterations,temps_ms
+life, seq,1024,random,32,1,static,6400,55304.698
+life, omp,1024,random,32,1,static,6400,58639.791
+life, omp_lazy,1024,random,32,1,static,6400,58711.527
+life_char, seq,1024,random,32,1,static,6400,38370.018
+life_char, omp,1024,random,32,1,static,6400,39962.957
+life_char, omp_lazy,1024,random,32,1,static,6400,39987.337
+life_ft, seq,1024,random,32,1,static,6400,55529.720
+life_ft, omp,1024,random,32,1,static,6400,59418.106
+life_ft, omp_lazy,1024,random,32,1,static,6400,59723.458
+life, seq,1024,random,32,2,static,6400,55330.511
+life, omp,1024,random,32,2,static,6400,29292.519
