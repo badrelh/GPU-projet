@@ -49,4 +49,4 @@ for taille in sorted(df['taille'].unique()):
             
             filename = f"{output_dir}/speedup_{taille}_{tile}_{sched}.png"
             plt.savefig(filename, dpi=300)
-            print(f"✅ Figure générée : {filename}")
+            print(f" Figure générée : {filename}")

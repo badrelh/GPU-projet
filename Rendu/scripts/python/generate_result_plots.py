@@ -6,7 +6,7 @@ df = pd.read_csv("resultats.csv")
 df["temps_ms"] = pd.to_numeric(df["temps_ms"], errors='coerce')
 df = df.dropna()
 
-# 🎨 Définition des couleurs par version
+# Définition des couleurs par version
 couleurs = {
     "seq": "red",
     "omp": "blue",

@@ -42,7 +42,7 @@ plt.legend(title="Scheduling")
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
 plt.savefig(f"{outdir}/lazy_sched_variation_tile{tile_fixed}.png", dpi=300)
-print(f"✅ Figure : lazy_sched_variation_tile{tile_fixed}.png")
+print(f" Figure : lazy_sched_variation_tile{tile_fixed}.png")
 
 # ===== Courbe 2 : Variation de la taille de tuile (schedule fixé) =====
 sched_fixed = "static"
@@ -60,4 +60,4 @@ plt.legend(title="Tiling")
 plt.grid(True, linestyle='--', alpha=0.6)
 plt.tight_layout()
 plt.savefig(f"{outdir}/lazy_tiling_variation_sched-{sched_fixed}.png", dpi=300)
-print(f"✅ Figure : lazy_tiling_variation_sched-{sched_fixed}.png")
+print(f" Figure : lazy_tiling_variation_sched-{sched_fixed}.png")

@@ -3,20 +3,29 @@
 
 # Objectif du Projet
 
-Ce projet vise à comparer différentes implémentations du célèbre Jeu de la Vie de Conway (Game of Life), en évaluant les performances de versions CPU (OpenMP, variantes d’allocation mémoire) et GPU (CUDA).
+Comparer et analyser les performances de différentes implémentations du Jeu de la Vie de Conway :
+
+        - Versions CPU : séquentielle, OpenMP (avec tiling, scheduling, first-touch, lazy evaluation)
+        - Versions GPU : CUDA (addition vectorielle en démonstration du modèle GPU)
+
+L’objectif est de mesurer les gains de performances et d’identifier la portabilité des optimisations sur plusieurs jeux de données et architectures
 
 
 
 # Arborescence de Rendu 
-Rendu/
-├── Annex/                      # Informations système et figures supplémentaires
-├── C/                          # Versions CPU du Game of Life  
-├── Cuda/                       # Versions GPU avec CUDA
-├── data/results/              # Résultats expérimentaux (CSV)
-├── figures/                    # Graphiques générés à partir des résultats
-├── scripts/               # Scripts pour générer les résultats et les graphiques
-├── README.md                   # Ce fichier
-├── rpt/                        # (Rapport du projet, si présent)
+Rendu:
+
+```
+- Annex/         # Informations système, lstopo
+- C/             # Code C (life.c, life_ft.c, life_char.c)
+- Cuda/          # Code GPU (kernel.cu, kernel_for_plot.cu, plotCuda.py)
+- data/results/  # Fichiers CSV de résultats
+- figures/       # Graphiques générés (.png)
+- scripts/       # Scripts Makefile et Bash pour générer mesures & graphiques
+- README.md      # Ce fichier
+- rpt/           # Rapport PDF, annexes
+```
+
 
 
 
@@ -28,13 +37,9 @@ Utiliser la commande :
 - make empreinte mémoire : Génère le fichier empreinte_memoire.csv contenant la comparaison de la mémoire utilisée (footprint_bytes) entre les versions life et life_char.
 La comparaison est faite avec un nombre de threads fixé à 1 (exécution séquentielle).
 - make comparaison versions :Génère le fichier comparaison_versions.csv, contenant les performances des différentes versions du programme (life, life_char, life_ft) avec plusieurs configurations :
-
-    Version séquentielle (seq)
-
-    Version parallèle OpenMP (omp)
-
-    Version OpenMP avec allocation "lazy" (omp_lazy)
-
+    - Version séquentielle (seq)
+    - Version parallèle OpenMP (omp)
+    - Version OpenMP avec allocation "lazy" (omp_lazy)
 Les tests sont menés avec une grille de 1024x1024, un tiling de 32, et un nombre de threads variant de 1 à 48, sur différents jeux de données (random, ship, moultdiehard130...).
 
 - make comparaison omp_scheduling : Génère le fichier comparaison_omp_scheduling.csv, qui mesure l’impact des différents types de scheduling OpenMP (static, dynamic, guided) sur les performances selon le nombre de threads et la taille de tuile.
@@ -42,8 +47,6 @@ Les tests sont menés avec une grille de 1024x1024, un tiling de 32, et un nombr
 - make comparaison taille de tiling  : Génère le fichier comparaison_taille_tiling.csv, comparant les performances selon différentes tailles de tuiles (16, 32, 64, 128) pour un même jeu de données et version.
 
 - make comparaison de jeux de données : Génère le fichier comparaison_jeux_donnees.csv, comparant les performances de la version OpenMP sur différents jeux de données (random, ship, moultdiehard130, moultdiehard2474), avec un tiling fixe de 32 et schedule=static.
-
-
 
 ## Génération de graphes 
 Pour visualiser les résultats de performance et de consommation mémoire, plusieurs scripts Python sont disponibles pour générer automatiquement des graphes à partir des fichiers CSV produits précédemment.
@@ -88,15 +91,13 @@ L’option -sh permet de générer un hash de l’état final de la grille (l’
 
 Cela permet de s'assurer que les optimisations respectent bien la logique du programme séquentiel original (life_seq).
 
+Nous avons fait un script bash pour faciliter l'utilisation :  pour l'utiliser on utilise make diff_version .
 
-Nous avons fait un script bash pour faciliter l'utilisation 
 
 ## Partie Cuda et GPU 
 
 Cette section explore une implémentation simple d’un kernel CUDA pour réaliser l’addition de deux vecteurs, comparée à une version CPU de référence. L’objectif est double :
-
     - illustrer le modèle de programmation GPU avec CUDA,
-
     - comparer les performances CPU vs GPU sur des tailles de vecteurs croissantes.
 
 
@@ -111,28 +112,34 @@ Cette section explore une implémentation simple d’un kernel CUDA pour réalis
 
 ### Compilation
 
-Utilise nvcc (le compilateur NVIDIA CUDA) pour compiler les programmes :
 
-make        # Compile kernel
+Utilisez `nvcc` (NVIDIA CUDA Compiler) :
+
+```
+make        # Compile kernel.cu
 make plot   # Compile kernel_for_plot.cu et génère le graphe
+```
 
 
 ### Visualisation
 
 Le script Python plotCuda.py trace l’évolution des temps CPU et GPU pour différentes tailles de vecteur (de 2¹⁰ à 2²⁵), avec échelles logarithmiques pour mieux observer les variations :
-
-    x-axis : taille du vecteur (N)
-
-    y-axis : temps d’exécution en secondes
-
-    courbes : comparaison directe des performances CPU vs GPU
+    - x-axis : taille du vecteur (N).
+    - y-axis : temps d’exécution en secondes.
+    - courbes : comparaison directe des performances CPU vs GPU.
 
 
 ### Exemple de sortie console
 
-CPU addition verified successfully!
+    CPU addition verified successfully!
 
-CPU Time (): 1 seconds
-GPU Kernel Time: 0.002134 seconds
-Data Transfer Time (H->D): 0.008473 seconds
-Data Transfer Time (D->H): 0.004762 seconds
+    CPU Time (): 1 seconds
+    GPU Kernel Time: 0.002134 seconds
+    Data Transfer Time (H->D): 0.008473 seconds
+    Data Transfer Time (D->H): 0.004762 seconds
+
+
+
+# Contact 
+- Badr el habbassi : belhabbassi@bordeaux-inp.fr
+- Othmane boutahri : oboutahri007@bordeaux-inp.fr
