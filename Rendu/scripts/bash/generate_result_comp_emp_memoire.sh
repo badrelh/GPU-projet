@@ -24,7 +24,7 @@ for taille in "${tailles[@]}"; do
             echo "taille=$taille | jeu=$jeu | tile=$tile | kernel=$ker | version=$ver"
 
             # Exécution avec debug mémoire
-            output=$(./run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n --debug u 2>&1)
+            output=$(../run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n --debug u 2>&1)
 
             # Extraction de la mémoire et du temps
             mem=$(echo "$output" | grep -i "Memory footprint" | grep -Eo '[0-9]+' | tail -1)

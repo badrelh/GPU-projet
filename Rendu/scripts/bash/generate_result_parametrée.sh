@@ -41,10 +41,9 @@ for taille in "${tailles[@]}"; do
 
               echo "taille=$taille | jeu=$jeu | tile=$tile | threads=$th | sched=$sched | version=$ver | kernel=$ker"
 
-              # Lancer ./run avec parsing du temps affiché
-              # output=$(./run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n 2>&1)
-              echo "./run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n"
-              # temps=$(echo "$output" | grep -Eo '^[0-9]+\.[0-9]+$' | tail -1)
+              output=$(../run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n 2>&1)
+              echo "../run -k $ker -v $ver -a $jeu -s $taille -ts $tile -i $iter -n"
+              temps=$(echo "$output" | grep -Eo '^[0-9]+\.[0-9]+$' | tail -1)
 
               echo "$ker, $ver,$taille,$jeu,$tile,$th,$sched,$iter,$temps" >> "$out"
             done

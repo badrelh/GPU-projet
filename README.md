@@ -1,18 +1,30 @@
-[EasyPAP](https://gforgeron.gitlab.io/easypap) aims at providing students with an easy-to-use programming environment
-to learn parallel programming.
+# Projet Programmation Parallèle IT224 2025 - Badr El Habbassi & Othmane Boutahri
 
-The idea is to parallelize sequential computations on 2D matrices over multicore and GPU platforms. At each iteration,
-the current matrix can be displayed, allowing to visually check the correctness of the computation method.
+## Présentation du Projet
 
-Multiple variants can easily been developed (e.g. sequential, tiled, omp_for, omp_task, ocl, mpi) and compared.
+Ce projet est basé sur la plateforme [EasyPAP](https://gforgeron.gitlab.io/easypap), qui fournit un environnement simple pour apprendre la programmation parallèle.
 
-Most of the parameters can be specified as command line arguments, when running the program :
-* size of the 2D matrices or image file to be loaded
-* kernel to use (e.g. pixellize)
-* variant to use (e.g. omp_task)
-* maximum number of iterations to perform
-* interactive mode / performance mode
-* monitoring mode
-* and much more!
+L'objectif est de paralléliser des calculs séquentiels sur des matrices 2D en utilisant des plateformes multicœur et GPU. Les différentes variantes (séquentielle, OpenMP, CUDA) sont implémentées et comparées.
 
-Please read the [Getting Started Guide](https://gforgeron.gitlab.io/easypap/doc/Getting_Started.pdf) before you start!
+La plateforme permet de :
+- Choisir la taille des matrices ou le fichier image à charger
+- Sélectionner le kernel à utiliser (e.g. `life`)
+- Choisir la variante à utiliser (`seq`, `omp_task`, `omp_for`, etc.)
+- Définir le nombre maximal d'itérations
+- Activer le mode interactif ou le mode performance
+- Monitorer les performances
+
+Pour plus de détails, consultez le [Guide de démarrage](https://gforgeron.gitlab.io/easypap/doc/Getting_Started.pdf).
+
+## Objectif du Projet
+
+Analyser et comparer les performances de différentes implémentations du Jeu de la Vie de Conway :
+
+- **Versions CPU** : Séquentielle, OpenMP (avec tiling, scheduling, first-touch, lazy evaluation)
+- **Versions GPU** : CUDA (illustration du modèle GPU via une addition vectorielle)
+
+L’objectif est de mesurer les gains de performances et d’évaluer la portabilité des optimisations sur différents jeux de données et architectures.
+
+
+
+# Voir le dossier Rendu pour découvrir notre implémentation détaillée.

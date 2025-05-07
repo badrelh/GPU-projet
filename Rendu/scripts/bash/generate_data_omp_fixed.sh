@@ -23,7 +23,7 @@ for taille in "${tailles[@]}"; do
         export OMP_NUM_THREADS=$th
         export OMP_SCHEDULE=static
 
-        cmd="./run -k life -v $version -a $jeu -s $taille -ts $tile -i $iter -n"
+        cmd="../run -k life -v $version -a $jeu -s $taille -ts $tile -i $iter -n"
         echo "$cmd"
         output=$($cmd 2>&1)
 
