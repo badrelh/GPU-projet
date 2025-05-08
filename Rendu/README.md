@@ -142,4 +142,4 @@ Le script Python plotCuda.py trace l’évolution des temps CPU et GPU pour diff
 
 # Contact 
 - Badr el habbassi : belhabbassi@bordeaux-inp.fr
-- Othmane boutahri : oboutahri007@bordeaux-inp.fr
+- Othmane boutahri : oboutahri002@bordeaux-inp.fr
