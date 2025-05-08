@@ -91,7 +91,17 @@ L’option -sh permet de générer un hash de l’état final de la grille (l’
 
 Cela permet de s'assurer que les optimisations respectent bien la logique du programme séquentiel original (life_seq).
 
-Nous avons fait un script bash pour faciliter l'utilisation :  pour l'utiliser on utilise make diff_version .
+
+Pour l'utiliser on utilise les commandes : 
+```
+./run -k life --arg moultdiehard1398 -s 256 -sh -n
+./run -k life --arg random -i 19 -s 256 -sh -n
+diff data/hash/life-seq-default-dim-256-iter-19-arg-random.sha256 \
+     data/hash/life-seq-default-dim-256-iter-1399-arg-moultdiehard1398.sha256
+```
+
+Ces commandes permettent de générer les fichiers de hash et de les comparer pour vérifier s'il y a des différences entre deux versions du kernel.
+
 
 
 ## Partie Cuda et GPU 
