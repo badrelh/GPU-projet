@@ -1,0 +1,17 @@
+kernel,version,taille,jeu_donnees,tile,threads,footprint_bytes,temps_ms
+life,seq,512,random,32,1,2097152,217.508
+life,omp,512,random,32,1,2097152,229.697
+life_char,seq,512,random,32,1,524288,188.897
+life_char,omp,512,random,32,1,524288,199.444
+life,seq,1024,random,32,1,8388608,953.187
+life,omp,1024,random,32,1,8388608,1026.208
+life_char,seq,1024,random,32,1,2097152,722.964
+life_char,omp,1024,random,32,1,2097152,758.225
+life,seq,2048,random,32,1,33554432,3866.477
+life,omp,2048,random,32,1,33554432,5447.380
+life_char,seq,2048,random,32,1,8388608,3586.458
+life_char,omp,2048,random,32,1,8388608,3679.123
+life,seq,4096,random,32,1,134217728,15475.268
+life,omp,4096,random,32,1,134217728,25592.002
+life_char,seq,4096,random,32,1,33554432,14458.555
+life_char,omp,4096,random,32,1,33554432,16692.499

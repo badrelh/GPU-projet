@@ -1,0 +1,22 @@
+kernel,version,taille,jeu_donnees,tile,threads,schedule,iterations,temps_ms
+life, seq,1024,random,32,1,static,6400,55287.572
+life_char, seq,1024,random,32,1,static,6400,38466.082
+life_ft, seq,1024,random,32,1,static,6400,55477.523
+life, seq,1024,random,32,2,static,6400,55298.779
+life_char, seq,1024,random,32,2,static,6400,38343.586
+life_ft, seq,1024,random,32,2,static,6400,55484.516
+life, seq,1024,random,32,4,static,6400,55309.441
+life_char, seq,1024,random,32,4,static,6400,38399.816
+life_ft, seq,1024,random,32,4,static,6400,55498.476
+life, seq,1024,random,32,8,static,6400,55484.737
+life_char, seq,1024,random,32,8,static,6400,38406.406
+life_ft, seq,1024,random,32,8,static,6400,55478.980
+life, seq,1024,random,32,12,static,6400,55307.083
+life_char, seq,1024,random,32,12,static,6400,38399.705
+life_ft, seq,1024,random,32,12,static,6400,55478.230
+life, seq,1024,random,32,24,static,6400,55387.888
+life_char, seq,1024,random,32,24,static,6400,38352.654
+life_ft, seq,1024,random,32,24,static,6400,55477.835
+life, seq,1024,random,32,48,static,6400,55275.041
+life_char, seq,1024,random,32,48,static,6400,38404.840
+life_ft, seq,1024,random,32,48,static,6400,55475.465
